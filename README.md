@@ -40,7 +40,7 @@ O backend da aplicação deverá ser desenvolvido utilizando [Laravel](https://l
 
 Caso seja o primeiro uso do projeto, é necessário fazer a instalação das dependências através do comando `composer install`.
 
-A rota principal da API pode ser acessada através do endereço [http://localhost/api](http://localhost/api).
+A rota principal da API pode ser acessada através do endereço [http://prova.test/api](http://prova.test/api).
 
 ## Frontend
 
@@ -51,3 +51,13 @@ Caso seja o primeiro uso do projeto, é necessário fazer a instalação das dep
 Para iniciar a aplicação basta entrar na pasta frontend no terminal, rodar o comando `ng serve` e então acessar o endereço [http://localhost:4200/](http://localhost:4200/) no navegador.
 
 ** Sugerimos a utilização do [Bootstrap](https://getbootstrap.com/) ([ng-bootstrap](https://ng-bootstrap.github.io/#/home)) para facilitar a criação das páginas.
+
+# Clone
+
+Se preferir, você pode clonar o projeto em seu computador.
+
+```
+git clone https://github.com/fivetechbauru/prova
+```
+
+Porém, será necessário ter instalado os requerimentos do **Laravel** (PHP 8+, Apache/Nginx e MySQL/MariaDB) e do **Angular** (Node 14+).
