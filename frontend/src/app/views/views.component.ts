@@ -1,18 +1,11 @@
+import { DataService } from './../services/data.service';
 import { MatTable, MatTableModule } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ElementDialogComponent } from '../shared/element-dialog/element-dialog.component';
+import { Idata } from '../models/IData';
 
-export interface PeriodicElement {
-  name: string;
-  position: number;
-  weight: number;
-  symbol: string;
-}
-
-const ELEMENT_DATA: PeriodicElement[] = [
-  {position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H'},
-
+const ELEMENT_DATA: Idata[] = [
 ];
 
 @Component({
@@ -25,63 +18,94 @@ const ELEMENT_DATA: PeriodicElement[] = [
 export class ViewsComponent implements OnInit {
   @ViewChild(MatTable)
   table!: MatTable<any>;
-  displayedColumns: string[] = ['position', 'name', 'weight', 'symbol', 'action' ];
+  displayedColumns: string[] = ['medicamento', 'quantidade', 'posologia', 'forma_adm', 'action' ];
   dataSource = ELEMENT_DATA;
 
-  constructor(public dialog: MatDialog,) {
 
-    }
+  public showMessageSaveSuccess: boolean = false;
+  public messageSaveSuccess: string = 'Salvo com sucesso.';
 
+  public showMessageSaveFail: boolean = false;
+  public messageSaveFail: string = 'Erro ao salvar. Tente novamente.';
 
-  ngOnInit(): void {
+  constructor(
+    public dialog: MatDialog,
+    private dataService: DataService,
+  ) {
   }
 
-  openDialog(element: PeriodicElement | null): void {
+  async ngOnInit(): Promise<void> {
+    ELEMENT_DATA.push(...await this.getAllData());
+    this.table.renderRows();
+  }
+
+  getAllData(): Promise<Idata[]> {
+    return new Promise<Idata[]>((resolve, reject) => {
+      this.dataService.getAllData().subscribe({
+        next: (elements) => resolve(elements),
+        error: () => reject(),
+      });
+    });
+  }
+
+  openDialog(element: Idata | null): void {
     const dialogRef = this.dialog.open(ElementDialogComponent, {
       width: '250px',
       data: element === null ? {
-        position: null,
-        name: '',
-        weight: null,
-        symbol: ''
+        id: null,
+        medicamento: null,
+        quantidade: '',
+        posologia: null,
+        forma_adm: ''
       } : {
-       
-        position: element.position,
-        name: element.name,
-        weight: element.weight,
-        symbol: element.symbol
-      }
 
+        id: element.id,
+        medicamento: element.medicamento,
+        quantidade: element.quantidade,
+        posologia: element.posologia,
+        forma_adm: element.forma_adm,
+      }
     });
 
+    dialogRef.componentInstance.saveSuccess.subscribe(() => {
+      this.successAlert();
+    });
 
+    dialogRef.componentInstance.saveFail.subscribe(() => {
+      this.failAlert();
+    });
 
-
-    dialogRef.afterClosed().subscribe(result => {
-      if(result != undefined){
-        if(this.dataSource.map(p=>p.position).includes(result.position)){
-          this.dataSource[result.position - 1] = result;
-          this.table.renderRows();
-        }
-        else{
-          this.dataSource.push(result);
-          this.table.renderRows();
-        }
-
-      }
+    dialogRef.afterClosed().subscribe(async () => {
+      this.dataSource = [];
+      this.dataSource.push(...await this.getAllData());
+      this.table.renderRows();
     });
 
   }
 
-  deleteElement(position: number):void{
-    this.dataSource = this.dataSource.filter(p => p.position !== position);
+  deleteElement(id: number):void{
+    this.dataService.deleteData(id).subscribe({
+      next: () => { this.successAlert(), this.dataSource = this.dataSource.filter(e => e.id !== id) },
+      error: () => this.failAlert,
+    });
   }
 
-
-
-  editElement(element: PeriodicElement): void {
+  editElement(element: Idata): void {
     this.openDialog(element);
   }
 
+  successAlert() {
+    this.showMessageSaveSuccess = true;
+    setTimeout(() => {
+      this.showMessageSaveSuccess = false;
+    }, 3000);
   }
+
+  failAlert() {
+    this.showMessageSaveFail = true;
+    setTimeout(() => {
+      this.showMessageSaveFail = false;
+    }, 3000);
+  }
+}
 
